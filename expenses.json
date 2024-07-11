@@ -1,17 +1,1 @@
-[
-  {
-    "payer": "Badi",
-    "amount": 1000,
-    "others": { "Sofie": 400, "Stine": 50, "Wold": 50, "Ditlev": 400 }
-  },
-  {
-    "payer": "Sofie",
-    "amount": 500,
-    "others": { "Badi": 250, "Stine": 50, "Wold": 100, "Ditlev": 50 }
-  },
-  {
-    "payer": "Wold",
-    "amount": 1500,
-    "others": { "Badi": "500", "Sofie": "100", "Stine": "100", "Ditlev": "600" }
-  }
-]
+[]

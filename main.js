@@ -61,30 +61,46 @@ function addExpense() {
 
   let payer = inputSelect.value;
   let amount = parseFloat(expenseAmount.value);
+  let date = new Date();
+
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  let formattedDate = months[date.getMonth()] + " " + date.getDate();
+  let formattedTime =
+    date.getHours().toString().padStart(2, "0") +
+    ":" +
+    date.getMinutes().toString().padStart(2, "0");
+
   let expense = {
     payer: payer,
     amount: amount,
-    others: {},
+    player_amounts: {},
+    date: formattedDate + ", " + formattedTime,
   };
 
   if (
     (percentageRadio.checked && sum == 100) ||
     (!percentageRadio.checked && sum == expenseAmount.value)
   ) {
-
     inputs.forEach((input, index) => {
       let option = inputSelect.options[index];
-      if (option.value !== payer) {
-        expense.others[option.value] = percentageRadio.checked ? input.value * expenseAmount.value / 100 : input.value;
-      }
-    })
-
-    /* for (let i = 0; i < inputSelect.options.length; i++) {
-      let option = inputSelect.options[i];
-      if (option.value !== payer) {
-        expense.others[option.value] = "d";
-      }
-    } */
+      expense.player_amounts[option.value] = percentageRadio.checked
+        ? (input.value * expenseAmount.value) / 100
+        : input.value;
+    });
 
     fetch("/addExpense", {
       method: "POST",
@@ -132,9 +148,24 @@ function updateList() {
           let playerNames = [];
           let playerTotals = [];
 
-          data.forEach((data_expense) => {
-            let expense = document.createElement("li");
-            expense.innerHTML = `${data_expense.payer}, ${data_expense.amount}`;
+          data.forEach((data_expense, index) => {
+            let expense = document.createElement("div");
+            expense.setAttribute("class", "expense");
+            expense.setAttribute("data-index", index);
+            let expenseInnerHTML = `
+            <div class="expense-inner">
+              <div class="expense-front">
+                <span class="expense_payer">${data_expense.payer}</span>
+                <span class="expense_amount">$${data_expense.amount}</span>
+              </div>
+              <div class="expense-back">
+                <button class="remove_expense"><i class="fa-solid fa-xmark fa-lg"></i></button>
+              </div>
+            </div>
+            `;
+
+            expense.innerHTML = expenseInnerHTML;
+
             expensesList.append(expense);
             totalExpenseSum += data_expense.amount;
             expenseCounter++;
@@ -175,6 +206,22 @@ function updateList() {
           });
 
           updateBarChart(playerTotals, playerNames);
+
+          // Attach event listeners for the delete buttons
+          let removeButtons = document.querySelectorAll(".remove_expense");
+          removeButtons.forEach((remove) => {
+            remove.addEventListener("click", function () {
+              let expenseElement = remove.closest(".expense");
+              let expenseIndex = expenseElement.getAttribute("data-index");
+
+              fetch(`/delete_expense/${expenseIndex}`, { method: "DELETE" })
+                .then((response) => {
+                  if (response.ok) {
+                    updateList();
+                  } 
+                })
+            });
+          });
         });
     });
 }
@@ -255,19 +302,6 @@ function updateSplits() {
       splitSumSpan.innerHTML = percentageRadio.checked
         ? splitSum + "%"
         : "$" + (expenseAmount.value - splitSum).toFixed(2) * -1;
-      if (percentageRadio.checked) {
-        if (splitSum == 100) {
-          splitSumSpan.style.color = "var(--green)";
-        } else {
-          splitSumSpan.style.color = "var(--red)";
-        }
-      } else {
-        if (splitSum == 100) {
-          splitSumSpan.style.color = "var(--green)";
-        } else {
-          splitSumSpan.style.color = "var(--red)";
-        }
-      }
     });
   });
 
@@ -294,7 +328,6 @@ let playerTotalsChart = new Chart("playerTotals", {
     scales: {
       y: {
         min: 0,
-        max: 10000,
         display: false,
       },
       x: {
@@ -322,7 +355,6 @@ let playerTotalsChart = new Chart("playerTotals", {
 });
 
 function updateBarChart(totals, names) {
-
   playerTotalsChart.data.datasets[0].data = totals;
   playerTotalsChart.data.labels = names;
   playerTotalsChart.update();

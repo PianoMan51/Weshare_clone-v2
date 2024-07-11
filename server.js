@@ -128,6 +128,43 @@ app.post("/addPlayer", (req, res) => {
   });
 });
 
+/////////////////////  DELETE DATA /////////////////////
+app.delete("/delete_expense/:id", (req, res) => {
+  const expenseId = req.params.id;
+  const filename = "expenses.json";
+
+  // Read the current contents of expenses.json
+  fs.readFile(filename, "utf8", (err, data) => {
+    try {
+      // Parse the JSON data
+      let expenses = JSON.parse(data);
+      
+      // Remove the expense from the array
+      expenses.splice(expenseId, 1);
+
+
+      // Save the updated JSON back to the file
+      fs.writeFile(
+        filename,
+        JSON.stringify(expenses, null, 2),
+        "utf8",
+        (err) => {
+          if (err) {
+            console.error(`Error writing file ${filename}:`, err);
+            return res.status(500).json({ error: "Internal Server Error" });
+          }
+
+          // Respond with success message
+          res.json({ message: "Expense deleted successfully" });
+        }
+      );
+    } catch (error) {
+      console.error("Error parsing JSON:", error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+});
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
