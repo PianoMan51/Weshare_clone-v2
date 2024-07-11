@@ -1,0 +1,143 @@
+:root {
+  --background: #34495e;
+  --darkbackground: #2c3e50;
+  --green: #2ecc71;
+  --darkgreen: #27ae60;
+  --moneygreen: #4cd137;
+  --darkmoneygreen: #44bd32;
+  --yellow: #f1c40f;
+  --darkyellow: #f39c12;
+  --orange: #e67e22;
+  --purple: #8e44ad;
+  --red: #e74c3c;
+  --darkred: #c0392b;
+  --sick: #e95e50;
+  --darksick: #d04436;
+  --white: #f5f6fa;
+  --lightgray: #ecf0f1;
+  --gray: #bdc3c7;
+  --darkgray: #aab0b3;
+  --darkergray: #84898b;
+  --darkestgray: #717577;
+  --blue: #3498db;
+  --darkblue: #2980b9;
+  --paper: #f7f1e3;
+  --borderRadius: 10px;
+}
+
+body {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  background-color: var(--lightgray);
+  margin: 12px;
+}
+
+#app {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+
+#nav_banner {
+  background-color: white;
+  width: 250px;
+  height: 95vh;
+  padding: 8px;
+  border-radius: var(--borderRadius);
+  display: flex;
+  flex-direction: column;
+}
+
+#content {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.content {
+  background-color: white;
+  border-radius: var(--borderRadius);
+  padding: 10px;
+}
+
+.section.left,
+.section.right {
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#total_dashboard {
+  background-color: white;
+  border-radius: var(--borderRadius);
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#total_dashboard h3 {
+  margin: 0px 0px 10px 0px;
+}
+
+#total_dashboard span {
+  font-size: small;
+}
+
+#barchart {
+  background-color: white;
+  height: 240px;
+  border-radius: var(--borderRadius);
+}
+
+.total_dashboard.section {
+  width: 50%;
+  height: 100%;
+  background-color: var(--moneygreen);
+  border-radius: var(--borderRadius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#totalExpense {
+  color: white;
+  font-weight: bold;
+}
+
+#barchart {
+  background-color: white;
+}
+
+#add_player_container div {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+#add_player_container input {
+  width: 200px;
+}
+
+#playerList {
+  margin: 0px;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: auto auto auto;
+}
+
+#playerList li {
+  list-style-type: none;
+  user-select: none;
+  width: 80px;
+  height: 30px;
+  border-radius: 20px;
+  padding: 5px 10px;
+  margin: 0px auto 10px auto;
+  background-color: var(--blue);
+  color: white;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

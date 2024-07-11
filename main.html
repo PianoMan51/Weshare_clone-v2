@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>WeShare</title>
+    <link href="main.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div id="nav_banner">
+            <span>123</span>
+            <span>123</span>
+            <span>123</span>
+            <span>123</span>
+
+        </div>
+
+        <div id="content">
+
+            <div class="section left" style="width: 60%;">
+                <div id="total_dashboard" class="content">
+                    <div>
+                        <h3>Total expenses</h3>
+                        <span>Thursday, July 11, 2024</span>
+                    </div>
+                    <div class="total_dashboard section">
+                        <span id="totalExpense" style="font-size: 30px;"></span>
+                    </div>
+
+                </div>
+
+                <div id="barchart" class="content">
+                    <canvas id="playerTotals"></canvas>
+                </div>
+
+                <div class="content" style="flex: 1">
+                    <h3>All expenses</h3>
+                    <span id="expenseCounter">3 total</span>
+                    <ul id="expensesList"></ul>
+                </div>
+            </div>
+
+            <div class="section right">
+                <div id="add_player_container" class="content">
+                    <h2>Add players</h2>
+                    <div>
+                        <input id="add_players">
+                        <button id="add_playerButton" style="width: 50px;">Add</button>
+                    </div>
+
+                    <ul id="playerList"></ul>
+                </div>
+
+                <div id="input_container" class="content_section">
+                    <h2>Add expense</h2>
+
+                    <div id="expense_details">
+                        <span>Who paid ?</span>
+                        <select id="input_select">
+                        </select>
+                        <span>How much?</span>
+                        <input id="inputAmount" type="number">
+                        <button id="addExpense">Add</button>
+                    </div>
+
+                    <div id="splitContainer"></div>
+
+                </div>
+
+
+
+
+                <div id="playerTotalList" style="list-style-type: none;"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <script src="main.js"></script>
+</body>
+
+</html>
