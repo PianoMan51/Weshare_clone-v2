@@ -1,32 +1,17 @@
 [
   {
     "payer": "Badi",
-    "amount": 3,
-    "others": { "Sofie": 0.75, "Stine": 0.75, "Wold": 0.75 }
-  },
-  {
-    "payer": "Badi",
-    "amount": 333,
-    "others": { "Sofie": 83.25, "Stine": 83.25, "Wold": 83.25 }
-  },
-  {
-    "payer": "Badi",
-    "amount": 400,
-    "others": { "Sofie": 100, "Stine": 100, "Wold": 100 }
-  },
-  {
-    "payer": "Stine",
-    "amount": 333,
-    "others": { "Badi": 83.25, "Sofie": 83.25, "Wold": 83.25 }
-  },
-  {
-    "payer": "Badi",
-    "amount": 33,
-    "others": { "Sofie": 8.25, "Stine": 8.25, "Wold": 8.25 }
-  },
-  {
-    "payer": "Badi",
     "amount": 1000,
-    "others": { "Sofie": 250, "Stine": 250, "Wold": 250 }
+    "others": { "Sofie": 400, "Stine": 50, "Wold": 50, "Ditlev": 400 }
+  },
+  {
+    "payer": "Sofie",
+    "amount": 500,
+    "others": { "Badi": 250, "Stine": 50, "Wold": 100, "Ditlev": 50 }
+  },
+  {
+    "payer": "Wold",
+    "amount": 1500,
+    "others": { "Badi": "500", "Sofie": "100", "Stine": "100", "Ditlev": "600" }
   }
 ]

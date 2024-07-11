@@ -5,6 +5,12 @@
     <title>WeShare</title>
     <link href="main.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <script src="https://kit.fontawesome.com/d66dd0368f.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -42,7 +48,7 @@
                 </div>
             </div>
 
-            <div class="section right">
+            <div class="section right" style="width: 40%;">
                 <div id="add_player_container" class="content">
                     <h2>Add players</h2>
                     <div>
@@ -53,7 +59,7 @@
                     <ul id="playerList"></ul>
                 </div>
 
-                <div id="input_container" class="content_section">
+                <div id="input_container" class="content">
                     <h2>Add expense</h2>
 
                     <div id="expense_details">
@@ -61,18 +67,25 @@
                         <select id="input_select">
                         </select>
                         <span>How much?</span>
-                        <input id="inputAmount" type="number">
-                        <button id="addExpense">Add</button>
+                        <input id="inputAmount">
+                        <button id="continue">Continue</button>
                     </div>
 
-                    <div id="splitContainer"></div>
+                    <div id="splitContainer" style="display: none;">
+                        <label for="percentage">%</label>
+                        <input type="radio" name="splitType" id="percentage" checked="checked"><br>
+                        <label for="raw">$</label>
+                        <input type="radio" name="splitType" id="raw">
+
+                        <div id="splitPlayers"></div>
+
+                        <span id="splitSum" style="color: var(--green)"></span><br>
+                        <button id="addExpense">Add expense</button>
+                    </div>
 
                 </div>
 
 
-
-
-                <div id="playerTotalList" style="list-style-type: none;"></div>
             </div>
 
         </div>

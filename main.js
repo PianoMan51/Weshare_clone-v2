@@ -3,16 +3,33 @@ let addPlayersInput = document.getElementById("add_players");
 let expenseAmount = document.getElementById("inputAmount");
 let inputSelect = document.getElementById("input_select");
 let addExpenseButton = document.getElementById("addExpense");
+let splitPlayers = document.getElementById("splitPlayers");
+let splitContainer = document.getElementById("splitContainer");
+let percentageRadio = document.getElementById("percentage");
+let rawRadio = document.getElementById("raw");
+
+let userColors = [
+  "rgb(46, 204, 113)", // Green
+  "rgb(52, 152, 219)", // Blue
+  "rgb(230, 126, 34)", // Orange
+  "rgb(231, 76, 60)", // Red
+  "rgb(155, 89, 182)", // Purple
+  "rgb(241, 196, 15)", // Yellow
+  "rgb(52, 73, 94)", // Black
+];
 
 addPlayerButton.addEventListener("click", function () {
   addPlayer(addPlayersInput.value);
 });
 
+percentageRadio.addEventListener("change", updateSplits);
+rawRadio.addEventListener("change", updateSplits);
+
 addExpenseButton.onclick = () => addExpense();
 
 function addPlayer(name) {
   if (name) {
-    const playerName = { name: name };
+    let playerName = { name: name };
     fetch("/addPlayer", {
       method: "POST",
       headers: {
@@ -23,7 +40,7 @@ function addPlayer(name) {
       .then((response) => {
         if (response.ok) {
           console.log("Player added successfully");
-          addPlayersInput.value = "";
+
           updateList();
         }
       })
@@ -36,24 +53,38 @@ function addPlayer(name) {
 }
 
 function addExpense() {
-  if (expenseAmount.value !== "") {
-    let payer = inputSelect.value;
-    let amount = parseFloat(expenseAmount.value);
-    let expense = {
-      payer: payer,
-      amount: amount,
-      others: {},
-    };
+  let sum = 0;
+  let inputs = document.querySelectorAll("#splitPlayers .splitInput");
+  inputs.forEach((input) => {
+    sum += +input.value;
+  });
 
-    let splitAmount = amount / 4;
+  let payer = inputSelect.value;
+  let amount = parseFloat(expenseAmount.value);
+  let expense = {
+    payer: payer,
+    amount: amount,
+    others: {},
+  };
 
-    // Get all player names from the inputSelect options except the payer
-    for (let i = 0; i < inputSelect.options.length; i++) {
+  if (
+    (percentageRadio.checked && sum == 100) ||
+    (!percentageRadio.checked && sum == expenseAmount.value)
+  ) {
+
+    inputs.forEach((input, index) => {
+      let option = inputSelect.options[index];
+      if (option.value !== payer) {
+        expense.others[option.value] = percentageRadio.checked ? input.value * expenseAmount.value / 100 : input.value;
+      }
+    })
+
+    /* for (let i = 0; i < inputSelect.options.length; i++) {
       let option = inputSelect.options[i];
       if (option.value !== payer) {
-        expense.others[option.value] = splitAmount;
+        expense.others[option.value] = "d";
       }
-    }
+    } */
 
     fetch("/addExpense", {
       method: "POST",
@@ -72,8 +103,13 @@ function addExpense() {
       .catch((error) => {
         console.error("Error:", error);
       });
+    splitContainer.style.display = "none";
   } else {
-    alert("Empty");
+    alert(
+      percentageRadio.checked
+        ? "Doesn't add to 100%"
+        : `Doesn't add to $${expenseAmount.value}`
+    );
   }
 }
 
@@ -85,61 +121,213 @@ function updateList() {
   expensesList.innerHTML = "";
   playerList.innerHTML = "";
   inputSelect.innerHTML = "";
+  splitPlayers.innerHTML = "";
+
   fetch("/expenses")
     .then((response) => response.json())
     .then((data) => {
-      let playerTotal = 0;
-      data.forEach((data_expense) => {
-        let expense = document.createElement("li");
-        expense.innerHTML = `${data_expense.payer}, ${data_expense.amount}`;
-        expensesList.append(expense);
-        totalExpenseSum += data_expense.amount;
-        expenseCounter++;
-      });
-      document.getElementById("totalExpense").innerHTML ="$ " + totalExpenseSum;
-      document.getElementById("expenseCounter").innerHTML = `Amount of expenses: ${expenseCounter}`;
-    });
+      fetch("/players")
+        .then((response) => response.json())
+        .then((players) => {
+          let playerNames = [];
+          let playerTotals = [];
 
-    
-  fetch("/players")
-    .then((response) => response.json())
-    .then((data) => {
-      let playerNames = [];
-      data.forEach((data_player) => {
-        let player = document.createElement("li");
-        let player_option = document.createElement("option");
+          data.forEach((data_expense) => {
+            let expense = document.createElement("li");
+            expense.innerHTML = `${data_expense.payer}, ${data_expense.amount}`;
+            expensesList.append(expense);
+            totalExpenseSum += data_expense.amount;
+            expenseCounter++;
+          });
+          document.getElementById("totalExpense").innerHTML =
+            "$ " + totalExpenseSum;
+          document.getElementById(
+            "expenseCounter"
+          ).innerHTML = `Amount of expenses: ${expenseCounter}`;
 
-        player.innerHTML = data_player.name;
-        player_option.innerHTML = data_player.name;
+          players.forEach((data_player, index) => {
+            let player = document.createElement("li");
+            let player_option = document.createElement("option");
 
-        playerNames.push(data_player.name);
+            player.innerHTML = data_player.name;
+            if (userColors[index]) {
+              player.style.backgroundColor = userColors[index];
+            } else {
+              player.style.backgroundColor = "black";
+            }
 
-        playerList.append(player);
-        inputSelect.append(player_option);
-      });
-      playerTotals.data.labels = playerNames;
-      updateBarChart();
+            player_option.innerHTML = data_player.name;
+
+            playerNames.push(data_player.name);
+
+            playerList.append(player);
+            inputSelect.append(player_option);
+
+            addPlayersInput.value = "";
+
+            let playerTotal = 0;
+            data.forEach((expense) => {
+              if (data_player.name == expense.payer) {
+                playerTotal += expense.amount;
+              }
+            });
+            playerTotals.push(playerTotal);
+          });
+
+          updateBarChart(playerTotals, playerNames);
+        });
     });
 }
 
-let playerTotals = new Chart("playerTotals", {
+document.getElementById("continue").onclick = () => {
+  if (expenseAmount.value !== "" && expenseAmount.value > 0) {
+    splitContainer.style.display = "block";
+    fetch("/players")
+      .then((response) => response.json())
+      .then((players) => {
+        splitPlayers.innerHTML = ""; // Clear previous entries
+        players.forEach((player) => {
+          let splitDiv = document.createElement("div");
+          let initialPreview = percentageRadio.checked
+            ? `$ ${(expenseAmount.value * 100) / players.length / 100}`
+            : ""; // Initial preview based on radio checked state
+          let innerHTML = `<span>${player.name}</span>
+                <input class="splitInput" value="${100 / players.length}">
+                <span class="splitLabel">${
+                  percentageRadio.checked ? "%" : "$"
+                }</span>
+                <span class="percentagePreview">${initialPreview}</span>`;
+
+          splitDiv.innerHTML = innerHTML;
+          splitPlayers.appendChild(splitDiv);
+        });
+
+        updateSplits();
+      });
+  } else {
+    alert("Empty or false input");
+    expenseAmount.value = "";
+  }
+};
+
+function updateSplits() {
+  let labels = document.querySelectorAll("#splitPlayers .splitLabel");
+  let percentagePreviews = document.querySelectorAll(".percentagePreview");
+  let inputs = document.querySelectorAll("#splitPlayers .splitInput");
+  let splitSumSpan = document.getElementById("splitSum");
+  let splitSum = 0;
+
+  labels.forEach((label) => {
+    label.textContent = percentageRadio.checked ? "%" : "$";
+  });
+
+  inputs.forEach((input, index) => {
+    input.value = percentageRadio.checked
+      ? 100 / splitPlayers.children.length
+      : expenseAmount.value / splitPlayers.children.length;
+
+    splitSum += +input.value;
+
+    // Update percentage preview immediately based on initial values
+    if (percentageRadio.checked) {
+      percentagePreviews[index].innerHTML = `$ ${
+        (input.value * expenseAmount.value) / 100
+      }`;
+    } else {
+      percentagePreviews[index].innerHTML = ""; // Clear if input or totalExpense is not a number
+    }
+
+    // Add event listener to update percentage preview and splitSum on input change
+    input.addEventListener("input", function () {
+      // Update splitSum with the changed input value
+      splitSum = 0;
+      inputs.forEach((input, index) => {
+        splitSum += +input.value;
+        if (percentageRadio.checked) {
+          percentagePreviews[index].innerHTML = `$ ${
+            (input.value * expenseAmount.value) / 100
+          }`;
+        } else {
+          percentagePreviews[index].innerHTML = ""; // Clear if input or totalExpense is not a number
+        }
+      });
+      // Update splitSum display
+      splitSumSpan.innerHTML = percentageRadio.checked
+        ? splitSum + "%"
+        : "$" + (expenseAmount.value - splitSum).toFixed(2) * -1;
+      if (percentageRadio.checked) {
+        if (splitSum == 100) {
+          splitSumSpan.style.color = "var(--green)";
+        } else {
+          splitSumSpan.style.color = "var(--red)";
+        }
+      } else {
+        if (splitSum == 100) {
+          splitSumSpan.style.color = "var(--green)";
+        } else {
+          splitSumSpan.style.color = "var(--red)";
+        }
+      }
+    });
+  });
+
+  // Initial display of splitSum
+  splitSumSpan.innerHTML = percentageRadio.checked
+    ? splitSum + "%"
+    : "$" + (expenseAmount.value - splitSum).toFixed(2);
+}
+
+let playerTotalsChart = new Chart("playerTotals", {
   type: "bar",
   data: {
     labels: [],
     datasets: [
       {
         data: [],
-        backgroundColor: "#3498db",
+        backgroundColor: userColors,
         borderRadius: 10,
       },
     ],
   },
+  options: {
+    maintainAspectRatio: false,
+    scales: {
+      y: {
+        min: 0,
+        max: 10000,
+        display: false,
+      },
+      x: {
+        grid: {
+          display: true,
+        },
+        display: false,
+      },
+    },
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        displayColors: false,
+        callbacks: {
+          label: function (tooltipItem) {
+            let value = tooltipItem.raw;
+            return value + " $";
+          },
+        },
+      },
+    },
+  },
 });
 
-function updateBarChart(data) {
-  playerTotals.data.datasets[0].data = data;
-  playerTotals.update();
+function updateBarChart(totals, names) {
+
+  playerTotalsChart.data.datasets[0].data = totals;
+  playerTotalsChart.data.labels = names;
+  playerTotalsChart.update();
 }
 
-playerTotals.update();
+playerTotalsChart.update();
 updateList();
+updateSplits();
