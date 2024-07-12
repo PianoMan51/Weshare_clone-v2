@@ -64,10 +64,19 @@
 
                     <div id="expense_details">
                         <span>Who paid ?</span>
-                        <select id="input_select">
-                        </select>
+                        <select id="input_select"></select>
                         <span>How much?</span>
                         <input id="inputAmount">
+                        <select id="category_select">
+                            <option value="groceries">Groceries</option>
+                            <option value="gift">Gift</option>
+                            <option value="drinks">Drinks</option>
+                            <option value="restaurant">Restaurant</option>
+                            <option value="other">Other</option>
+                            <input id="expense_comments" placeholder="Comments">
+                        </select>
+
+
                         <button id="continue">Continue</button>
                     </div>
 
@@ -83,6 +92,11 @@
                         <button id="addExpense">Add expense</button>
                     </div>
 
+                </div>
+
+                <div id="graphs_container" class="content">
+                    <canvas id="playerDoughnuts"></canvas>
+                    <canvas id="categoriesDoughnuts"></canvas>
                 </div>
 
 

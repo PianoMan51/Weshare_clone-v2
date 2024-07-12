@@ -7,6 +7,8 @@ let splitPlayers = document.getElementById("splitPlayers");
 let splitContainer = document.getElementById("splitContainer");
 let percentageRadio = document.getElementById("percentage");
 let rawRadio = document.getElementById("raw");
+let expenseCategory = document.getElementById("category_select");
+let expenseComment = document.getElementById("expense_comments")
 
 let userColors = [
   "rgb(46, 204, 113)", // Green
@@ -89,10 +91,12 @@ function addExpense() {
     amount: amount,
     player_amounts: {},
     date: formattedDate + ", " + formattedTime,
+    category: expenseCategory.value,
+    comment: expenseComment.value,
   };
 
   if (
-    (percentageRadio.checked && sum == 100) ||
+    (percentageRadio.checked && sum < 100.01 && sum > 99.99) ||
     (!percentageRadio.checked && sum == expenseAmount.value)
   ) {
     inputs.forEach((input, index) => {
@@ -114,6 +118,8 @@ function addExpense() {
           console.log("Expense posted successfully");
           updateList();
           expenseAmount.value = "";
+          expenseComment.value = "";
+
         }
       })
       .catch((error) => {
@@ -147,12 +153,12 @@ function updateList() {
         .then((players) => {
           let playerNames = [];
           let playerTotals = [];
-
-          data.forEach((data_expense, index) => {
-            let expense = document.createElement("div");
-            expense.setAttribute("class", "expense");
-            expense.setAttribute("data-index", index);
-            let expenseInnerHTML = `
+          if (data.length > 0) {
+            data.forEach((data_expense, index) => {
+              let expense = document.createElement("div");
+              expense.setAttribute("class", "expense");
+              expense.setAttribute("data-index", index);
+              let expenseInnerHTML = `
             <div class="expense-inner">
               <div class="expense-front">
                 <span class="expense_payer">${data_expense.payer}</span>
@@ -164,12 +170,16 @@ function updateList() {
             </div>
             `;
 
-            expense.innerHTML = expenseInnerHTML;
+              expense.innerHTML = expenseInnerHTML;
 
-            expensesList.append(expense);
-            totalExpenseSum += data_expense.amount;
-            expenseCounter++;
-          });
+              expensesList.append(expense);
+
+              totalExpenseSum += data_expense.amount;
+
+              expenseCounter++;
+            });
+          }
+          
           document.getElementById("totalExpense").innerHTML =
             "$ " + totalExpenseSum;
           document.getElementById(
@@ -198,14 +208,14 @@ function updateList() {
 
             let playerTotal = 0;
             data.forEach((expense) => {
-              if (data_player.name == expense.payer) {
-                playerTotal += expense.amount;
-              }
+                if (data_player.name == expense.payer) {
+                  playerTotal += expense.amount;
+                }
             });
             playerTotals.push(playerTotal);
           });
 
-          updateBarChart(playerTotals, playerNames);
+          updateCharts(playerTotals, playerNames);
 
           // Attach event listeners for the delete buttons
           let removeButtons = document.querySelectorAll(".remove_expense");
@@ -214,12 +224,13 @@ function updateList() {
               let expenseElement = remove.closest(".expense");
               let expenseIndex = expenseElement.getAttribute("data-index");
 
-              fetch(`/delete_expense/${expenseIndex}`, { method: "DELETE" })
-                .then((response) => {
-                  if (response.ok) {
-                    updateList();
-                  } 
-                })
+              fetch(`/delete_expense/${expenseIndex}`, {
+                method: "DELETE",
+              }).then((response) => {
+                if (response.ok) {
+                  updateList();
+                }
+              });
             });
           });
         });
@@ -270,15 +281,15 @@ function updateSplits() {
 
   inputs.forEach((input, index) => {
     input.value = percentageRadio.checked
-      ? 100 / splitPlayers.children.length
-      : expenseAmount.value / splitPlayers.children.length;
+      ? (100 / splitPlayers.children.length).toFixed(2)
+      : (expenseAmount.value / splitPlayers.children.length).toFixed(2);
 
     splitSum += +input.value;
 
     // Update percentage preview immediately based on initial values
     if (percentageRadio.checked) {
       percentagePreviews[index].innerHTML = `$ ${
-        (input.value * expenseAmount.value) / 100
+        ((input.value * expenseAmount.value) / 100).toFixed(2)
       }`;
     } else {
       percentagePreviews[index].innerHTML = ""; // Clear if input or totalExpense is not a number
@@ -292,7 +303,7 @@ function updateSplits() {
         splitSum += +input.value;
         if (percentageRadio.checked) {
           percentagePreviews[index].innerHTML = `$ ${
-            (input.value * expenseAmount.value) / 100
+            ((input.value * expenseAmount.value) / 100).toFixed(2)
           }`;
         } else {
           percentagePreviews[index].innerHTML = ""; // Clear if input or totalExpense is not a number
@@ -300,18 +311,18 @@ function updateSplits() {
       });
       // Update splitSum display
       splitSumSpan.innerHTML = percentageRadio.checked
-        ? splitSum + "%"
+        ? splitSum.toFixed(1) + "%"
         : "$" + (expenseAmount.value - splitSum).toFixed(2) * -1;
     });
   });
 
   // Initial display of splitSum
   splitSumSpan.innerHTML = percentageRadio.checked
-    ? splitSum + "%"
+    ? splitSum.toFixed(1) + "%"
     : "$" + (expenseAmount.value - splitSum).toFixed(2);
 }
 
-let playerTotalsChart = new Chart("playerTotals", {
+let playerTotalsBarChart = new Chart("playerTotals", {
   type: "bar",
   data: {
     labels: [],
@@ -328,13 +339,15 @@ let playerTotalsChart = new Chart("playerTotals", {
     scales: {
       y: {
         min: 0,
-        display: false,
+        display: true,
+        grid: {
+          display: false,
+        }
       },
       x: {
         grid: {
-          display: true,
+          display: false,
         },
-        display: false,
       },
     },
     plugins: {
@@ -354,12 +367,93 @@ let playerTotalsChart = new Chart("playerTotals", {
   },
 });
 
-function updateBarChart(totals, names) {
-  playerTotalsChart.data.datasets[0].data = totals;
-  playerTotalsChart.data.labels = names;
-  playerTotalsChart.update();
+let playerTotalsDoughnutChart = new Chart("playerDoughnuts", {
+  type: "doughnut",
+  data: {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: userColors,
+      },
+    ],
+  },
+  options: {
+    maintainAspectRatio: false,
+    borderWidth: 4,
+    borderRadius: 15,
+    onHover: { mode: null },
+    cutout: 90,
+    plugins: {
+      tooltip: {
+        displayColors: false,
+        callbacks: {
+          label: function (tooltipItem) {
+            let value = tooltipItem.raw;
+            return "$ " + value;
+          },
+        },
+        labels: {
+          display: false,
+        },
+      },
+      legend: {
+        display: false,
+      },
+    },
+  },
+
+});
+
+let categoriesDoughnutChart = new Chart("categoriesDoughnuts", {
+  type: "doughnut",
+  data: {
+    labels: [],
+    datasets: [
+      {
+        data: [],
+        backgroundColor: userColors,
+      },
+    ],
+  },
+  options: {
+    maintainAspectRatio: false,
+    borderWidth: 4,
+    borderRadius: 15,
+    onHover: { mode: null },
+    cutout: 90,
+    plugins: {
+      tooltip: {
+        displayColors: false,
+        callbacks: {
+          label: function (tooltipItem) {
+            let value = tooltipItem.raw;
+            return "$ " + value;
+          },
+        },
+        labels: {
+          display: false,
+        },
+      },
+      legend: {
+        display: false,
+      },
+    },
+  },
+
+});
+
+function updateCharts(totals, names) {
+  playerTotalsBarChart.data.datasets[0].data = totals;
+  playerTotalsBarChart.data.labels = names;
+
+  playerTotalsDoughnutChart.data.datasets[0].data = totals;
+  playerTotalsDoughnutChart.data.labels = names;
+
+  playerTotalsDoughnutChart.update();
+  playerTotalsBarChart.update();
 }
 
-playerTotalsChart.update();
+playerTotalsBarChart.update();
 updateList();
 updateSplits();

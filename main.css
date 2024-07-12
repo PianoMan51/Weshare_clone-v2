@@ -117,8 +117,8 @@ body {
 }
 
 .expense {
-  width: 120px;
-  height: 70px;
+  width: 160px;
+  height: 90px;
   perspective: 1000px;
   margin: 5px;
 }
@@ -152,6 +152,7 @@ body {
 .expense-front {
   background-color: var(--moneygreen);
   transform: rotateX(0deg);
+  gap: 10px;
 }
 
 .expense-back {
