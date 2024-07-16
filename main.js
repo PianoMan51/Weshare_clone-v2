@@ -1,14 +1,13 @@
 let addPlayerButton = document.getElementById("add_playerButton");
 let addPlayersInput = document.getElementById("add_players");
 let expenseAmount = document.getElementById("inputAmount");
-let inputSelect = document.getElementById("input_select");
 let addExpenseButton = document.getElementById("addExpense");
 let splitPlayers = document.getElementById("splitPlayers");
 let splitContainer = document.getElementById("splitContainer");
 let percentageRadio = document.getElementById("percentage");
 let rawRadio = document.getElementById("raw");
 let expenseCategory = document.getElementById("category_select");
-let expenseComment = document.getElementById("expense_comments")
+let categories = document.querySelectorAll(".category");
 
 let userColors = [
   "rgb(46, 204, 113)", // Green
@@ -28,6 +27,24 @@ percentageRadio.addEventListener("change", updateSplits);
 rawRadio.addEventListener("change", updateSplits);
 
 addExpenseButton.onclick = () => addExpense();
+
+document.getElementById("continue").onclick = () => continueExpense();
+
+expenseAmount.addEventListener("keypress", function (event) {
+  if (event.key == "Enter") {
+    continueExpense();
+  }
+});
+
+categories.forEach((cat) => {
+  cat.addEventListener("click", function () {
+    categories.forEach((item) => {
+      item.classList.remove("active");
+    });
+
+    cat.classList.add("active");
+  });
+});
 
 function addPlayer(name) {
   if (name) {
@@ -61,7 +78,7 @@ function addExpense() {
     sum += +input.value;
   });
 
-  let payer = inputSelect.value;
+  let payer = document.querySelector(".player.active").innerHTML;
   let amount = parseFloat(expenseAmount.value);
   let date = new Date();
 
@@ -91,17 +108,16 @@ function addExpense() {
     amount: amount,
     player_amounts: {},
     date: formattedDate + ", " + formattedTime,
-    category: expenseCategory.value,
-    comment: expenseComment.value,
+    category: document.querySelector(".category.active").value,
   };
 
   if (
     (percentageRadio.checked && sum < 100.01 && sum > 99.99) ||
     (!percentageRadio.checked && sum == expenseAmount.value)
   ) {
-    inputs.forEach((input, index) => {
-      let option = inputSelect.options[index];
-      expense.player_amounts[option.value] = percentageRadio.checked
+    inputs.forEach((input) => {
+      let option = document.querySelector(".player.active");
+      expense.player_amounts[option.innerHTML] = percentageRadio.checked
         ? (input.value * expenseAmount.value) / 100
         : input.value;
     });
@@ -118,8 +134,9 @@ function addExpense() {
           console.log("Expense posted successfully");
           updateList();
           expenseAmount.value = "";
-          expenseComment.value = "";
-
+          categories.forEach((item) => {
+            item.classList.remove("active");
+          });
         }
       })
       .catch((error) => {
@@ -142,7 +159,6 @@ function updateList() {
   let expenseCounter = 0;
   expensesList.innerHTML = "";
   playerList.innerHTML = "";
-  inputSelect.innerHTML = "";
   splitPlayers.innerHTML = "";
 
   fetch("/expenses")
@@ -153,6 +169,9 @@ function updateList() {
         .then((players) => {
           let playerNames = [];
           let playerTotals = [];
+          let categoryTotals = {};
+          let categories = new Set();
+
           if (data.length > 0) {
             data.forEach((data_expense, index) => {
               let expense = document.createElement("div");
@@ -177,18 +196,19 @@ function updateList() {
               totalExpenseSum += data_expense.amount;
 
               expenseCounter++;
+
+              // Accumulate category totals
+              if (!categoryTotals[data_expense.category]) {
+                categoryTotals[data_expense.category] = 0;
+              }
+              categoryTotals[data_expense.category] += data_expense.amount;
+              categories.add(data_expense.category);
             });
           }
-          
-          document.getElementById("totalExpense").innerHTML =
-            "$ " + totalExpenseSum;
-          document.getElementById(
-            "expenseCounter"
-          ).innerHTML = `Amount of expenses: ${expenseCounter}`;
 
           players.forEach((data_player, index) => {
-            let player = document.createElement("li");
-            let player_option = document.createElement("option");
+            let player = document.createElement("div");
+            player.setAttribute("class", "player");
 
             player.innerHTML = data_player.name;
             if (userColors[index]) {
@@ -197,25 +217,20 @@ function updateList() {
               player.style.backgroundColor = "black";
             }
 
-            player_option.innerHTML = data_player.name;
-
             playerNames.push(data_player.name);
 
             playerList.append(player);
-            inputSelect.append(player_option);
 
             addPlayersInput.value = "";
 
             let playerTotal = 0;
             data.forEach((expense) => {
-                if (data_player.name == expense.payer) {
-                  playerTotal += expense.amount;
-                }
+              if (data_player.name == expense.payer) {
+                playerTotal += expense.amount;
+              }
             });
             playerTotals.push(playerTotal);
           });
-
-          updateCharts(playerTotals, playerNames);
 
           // Attach event listeners for the delete buttons
           let removeButtons = document.querySelectorAll(".remove_expense");
@@ -233,40 +248,67 @@ function updateList() {
               });
             });
           });
+
+          document.getElementById("totalExpense").innerHTML =
+            "$ " + totalExpenseSum;
+          document.getElementById(
+            "expenseCounter"
+          ).innerHTML = `Amount of expenses: ${expenseCounter}`;
+
+          let playerElements = document.querySelectorAll(".player");
+          playerElements.forEach((player) => {
+            player.addEventListener("click", function () {
+              playerElements.forEach((item) => {
+                item.classList.remove("active");
+              });
+
+              player.classList.add("active");
+            });
+          });
+
+          updateCharts(playerTotals, playerNames);
+          updateCategories(
+            Object.values(categoryTotals),
+            Array.from(categories)
+          );
         });
     });
 }
 
-document.getElementById("continue").onclick = () => {
-  if (expenseAmount.value !== "" && expenseAmount.value > 0) {
-    splitContainer.style.display = "block";
-    fetch("/players")
-      .then((response) => response.json())
-      .then((players) => {
-        splitPlayers.innerHTML = ""; // Clear previous entries
-        players.forEach((player) => {
-          let splitDiv = document.createElement("div");
-          let initialPreview = percentageRadio.checked
-            ? `$ ${(expenseAmount.value * 100) / players.length / 100}`
-            : ""; // Initial preview based on radio checked state
-          let innerHTML = `<span>${player.name}</span>
+function continueExpense() {
+  if (expenseAmount.value > 0) {
+    if (document.querySelector(".category.active")) {
+      splitContainer.style.display = "block";
+      fetch("/players")
+        .then((response) => response.json())
+        .then((players) => {
+          splitPlayers.innerHTML = ""; // Clear previous entries
+          players.forEach((player) => {
+            let splitDiv = document.createElement("div");
+            let initialPreview = percentageRadio.checked
+              ? `$ ${(expenseAmount.value * 100) / players.length / 100}`
+              : "";
+            let innerHTML = `<span>${player.name}</span>
                 <input class="splitInput" value="${100 / players.length}">
                 <span class="splitLabel">${
                   percentageRadio.checked ? "%" : "$"
                 }</span>
                 <span class="percentagePreview">${initialPreview}</span>`;
 
-          splitDiv.innerHTML = innerHTML;
-          splitPlayers.appendChild(splitDiv);
-        });
+            splitDiv.innerHTML = innerHTML;
+            splitPlayers.appendChild(splitDiv);
+          });
 
-        updateSplits();
-      });
+          updateSplits();
+        });
+    } else {
+      alert("Choose category");
+    }
   } else {
-    alert("Empty or false input");
+    alert("Insert amount");
     expenseAmount.value = "";
   }
-};
+}
 
 function updateSplits() {
   let labels = document.querySelectorAll("#splitPlayers .splitLabel");
@@ -288,9 +330,10 @@ function updateSplits() {
 
     // Update percentage preview immediately based on initial values
     if (percentageRadio.checked) {
-      percentagePreviews[index].innerHTML = `$ ${
-        ((input.value * expenseAmount.value) / 100).toFixed(2)
-      }`;
+      percentagePreviews[index].innerHTML = `$ ${(
+        (input.value * expenseAmount.value) /
+        100
+      ).toFixed(2)}`;
     } else {
       percentagePreviews[index].innerHTML = ""; // Clear if input or totalExpense is not a number
     }
@@ -302,9 +345,10 @@ function updateSplits() {
       inputs.forEach((input, index) => {
         splitSum += +input.value;
         if (percentageRadio.checked) {
-          percentagePreviews[index].innerHTML = `$ ${
-            ((input.value * expenseAmount.value) / 100).toFixed(2)
-          }`;
+          percentagePreviews[index].innerHTML = `$ ${(
+            (input.value * expenseAmount.value) /
+            100
+          ).toFixed(2)}`;
         } else {
           percentagePreviews[index].innerHTML = ""; // Clear if input or totalExpense is not a number
         }
@@ -342,7 +386,7 @@ let playerTotalsBarChart = new Chart("playerTotals", {
         display: true,
         grid: {
           display: false,
-        }
+        },
       },
       x: {
         grid: {
@@ -381,9 +425,9 @@ let playerTotalsDoughnutChart = new Chart("playerDoughnuts", {
   options: {
     maintainAspectRatio: false,
     borderWidth: 4,
-    borderRadius: 15,
+    borderRadius: 10,
     onHover: { mode: null },
-    cutout: 90,
+    cutout: 70,
     plugins: {
       tooltip: {
         displayColors: false,
@@ -402,7 +446,6 @@ let playerTotalsDoughnutChart = new Chart("playerDoughnuts", {
       },
     },
   },
-
 });
 
 let categoriesDoughnutChart = new Chart("categoriesDoughnuts", {
@@ -419,9 +462,9 @@ let categoriesDoughnutChart = new Chart("categoriesDoughnuts", {
   options: {
     maintainAspectRatio: false,
     borderWidth: 4,
-    borderRadius: 15,
+    borderRadius: 10,
     onHover: { mode: null },
-    cutout: 90,
+    cutout: 70,
     plugins: {
       tooltip: {
         displayColors: false,
@@ -440,18 +483,24 @@ let categoriesDoughnutChart = new Chart("categoriesDoughnuts", {
       },
     },
   },
-
 });
 
-function updateCharts(totals, names) {
-  playerTotalsBarChart.data.datasets[0].data = totals;
-  playerTotalsBarChart.data.labels = names;
+function updateCharts(data, labels) {
+  playerTotalsBarChart.data.datasets[0].data = data;
+  playerTotalsBarChart.data.labels = labels;
 
-  playerTotalsDoughnutChart.data.datasets[0].data = totals;
-  playerTotalsDoughnutChart.data.labels = names;
+  playerTotalsDoughnutChart.data.datasets[0].data = data;
+  playerTotalsDoughnutChart.data.labels = labels;
 
   playerTotalsDoughnutChart.update();
   playerTotalsBarChart.update();
+}
+
+function updateCategories(data, labels) {
+  categoriesDoughnutChart.data.datasets[0].data = data;
+  categoriesDoughnutChart.data.labels = labels;
+
+  categoriesDoughnutChart.update();
 }
 
 playerTotalsBarChart.update();

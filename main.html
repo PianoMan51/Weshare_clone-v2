@@ -16,11 +16,7 @@
 <body>
     <div id="app">
         <div id="nav_banner">
-            <span>123</span>
-            <span>123</span>
-            <span>123</span>
-            <span>123</span>
-
+            <span>Home</span>
         </div>
 
         <div id="content">
@@ -55,27 +51,26 @@
                         <input id="add_players">
                         <button id="add_playerButton" style="width: 50px;">Add</button>
                     </div>
-
-                    <ul id="playerList"></ul>
                 </div>
 
                 <div id="input_container" class="content">
                     <h2>Add expense</h2>
 
                     <div id="expense_details">
-                        <span>Who paid ?</span>
-                        <select id="input_select"></select>
-                        <span>How much?</span>
-                        <input id="inputAmount">
-                        <select id="category_select">
-                            <option value="groceries">Groceries</option>
-                            <option value="gift">Gift</option>
-                            <option value="drinks">Drinks</option>
-                            <option value="restaurant">Restaurant</option>
-                            <option value="other">Other</option>
-                            <input id="expense_comments" placeholder="Comments">
-                        </select>
+                        <input id="inputAmount" placeholder="499,-">
 
+                        <div id="categories">
+                            <button class="category" value="groceries"><i
+                                    class="fa-solid fa-cart-shopping fa-2xl"></i></button>
+                            <button class="category" value="drinks"><i
+                                    class="fa-solid fa-martini-glass-citrus fa-2xl"></i></button>
+                            <button class="category" value="restaurant"><i
+                                    class="fa-solid fa-utensils fa-2xl"></i></button>
+                            <button class="category" value="gift"><i class="fa-solid fa-gift fa-2xl"></i></button>
+                            <button class="category" value="other"><i class="fa-solid fa-question fa-2xl"></i></button>
+                        </div>
+
+                        <div id="playerList"></div>
 
                         <button id="continue">Continue</button>
                     </div>
@@ -95,8 +90,12 @@
                 </div>
 
                 <div id="graphs_container" class="content">
-                    <canvas id="playerDoughnuts"></canvas>
-                    <canvas id="categoriesDoughnuts"></canvas>
+                    <div class="doughnutGraph">
+                        <canvas id="playerDoughnuts"></canvas>
+                    </div>
+                    <div class="doughnutGraph">
+                        <canvas id="categoriesDoughnuts"></canvas>
+                    </div>
                 </div>
 
 

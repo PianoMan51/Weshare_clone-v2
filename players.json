@@ -1,1 +1,7 @@
-[{"name":"Badi"},{"name":"Sofie"},{"name":"Stine"},{"name":"Wold"},{"name":"Ditlev"},{"name":"Patrick"}]
+[
+  { "name": "Badi" },
+  { "name": "Sofie" },
+  { "name": "Stine" },
+  { "name": "Wold" },
+  { "name": "peter" }
+]

@@ -29,6 +29,7 @@ body {
   font-family: "Poppins";
   background-color: var(--lightgray);
   margin: 12px;
+  overflow: hidden;
 }
 
 #app {
@@ -116,6 +117,18 @@ body {
   margin: 0;
 }
 
+#graphs_container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.doughnutGraph {
+  width: 200px;
+  height: 200px;
+}
+
 .expense {
   width: 160px;
   height: 90px;
@@ -142,7 +155,7 @@ body {
   backface-visibility: hidden;
   display: flex;
   flex-direction: column;
-  color: white; 
+  color: white;
   cursor: pointer;
   border-radius: 8px;
   padding: 5px;
@@ -162,7 +175,7 @@ body {
   justify-content: center;
 }
 
-.remove_expense{
+.remove_expense {
   border: none;
   background-color: transparent;
   color: white;
@@ -171,12 +184,12 @@ body {
   top: 5px;
   right: 5px;
   transform: scale(1);
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
-.remove_expense:hover{
+.remove_expense:hover {
   transform: scale(1.3);
-  transition: all .3s;
+  transition: all 0.3s;
 }
 
 .expense_payer {
@@ -188,6 +201,37 @@ body {
 .expense_amount {
   font-size: 30px;
   font-weight: 800;
+}
+
+#categories {
+  display: flex;
+  justify-content: space-around;
+  gap: 8px;
+}
+
+.category {
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  width: 50px;
+  border-radius: 50%;
+  background-color: var(--background);
+  color: white;
+  cursor: pointer;
+  transform: scale(1);
+  transition: all 0.2s;
+}
+
+.category:hover {
+  transform: scale(1.1);
+  transition: all 0.2s;
+}
+
+.category.active {
+  background-color: var(--darkgreen);
+    transform: scale(1.1);
 }
 
 #add_player_container div {
@@ -205,9 +249,10 @@ body {
   padding: 20px;
   display: grid;
   grid-template-columns: auto auto auto;
+  gap: 8px;
 }
 
-#playerList li {
+.player {
   user-select: none;
   width: 80px;
   height: 30px;
@@ -219,8 +264,40 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+  transform: scale(1);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.player:not(.active):hover {
+  transform: scale(1.05);
+  transition: all 0.2s;
+}
+
+.player:not(.active){
+  opacity: 50%;
+  transform: scale(0.9);
 }
 
 #input_container {
-  height: 400px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#expense_details {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+#inputAmount {
+  border: none;
+  background-color: var(--lightgray);
+  padding: 5px 10px;
+  border-radius: var(--borderRadius);
+  text-align: center;
+  font-size: 16px;
+  font-weight: 600;
 }
