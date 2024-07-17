@@ -172,40 +172,6 @@ function updateList() {
           let categoryTotals = {};
           let categories = new Set();
 
-          if (data.length > 0) {
-            data.forEach((data_expense, index) => {
-              let expense = document.createElement("div");
-              expense.setAttribute("class", "expense");
-              expense.setAttribute("data-index", index);
-              let expenseInnerHTML = `
-            <div class="expense-inner">
-              <div class="expense-front">
-                <span class="expense_payer">${data_expense.payer}</span>
-                <span class="expense_amount">$${data_expense.amount}</span>
-              </div>
-              <div class="expense-back">
-                <button class="remove_expense"><i class="fa-solid fa-xmark fa-lg"></i></button>
-              </div>
-            </div>
-            `;
-
-              expense.innerHTML = expenseInnerHTML;
-
-              expensesList.append(expense);
-
-              totalExpenseSum += data_expense.amount;
-
-              expenseCounter++;
-
-              // Accumulate category totals
-              if (!categoryTotals[data_expense.category]) {
-                categoryTotals[data_expense.category] = 0;
-              }
-              categoryTotals[data_expense.category] += data_expense.amount;
-              categories.add(data_expense.category);
-            });
-          }
-
           players.forEach((data_player, index) => {
             let player = document.createElement("div");
             player.setAttribute("class", "player");
@@ -232,6 +198,46 @@ function updateList() {
             playerTotals.push(playerTotal);
           });
 
+          if (data.length > 0) {
+            let color = "";
+            data.forEach((data_expense, index) => {
+              playerNames.forEach((player, color_index) => {
+                if (data_expense.payer == player) {
+                  color = userColors[color_index];
+                }
+              });
+
+              let expense = document.createElement("div");
+              expense.setAttribute("class", "expense");
+              expense.setAttribute("data-index", index);
+              let expenseInnerHTML = `
+            <div class="expense-inner">
+              <div class="expense-front" style="background-color: ${color}">${data_expense.payer}
+                <span class="expense_payer" </span>
+                <span class="expense_amount">$${data_expense.amount}</span>
+              </div>
+              <div class="expense-back">
+                <button class="remove_expense"><i class="fa-solid fa-xmark fa-lg"></i></button>
+              </div>
+            </div>
+            `;
+
+              expense.innerHTML = expenseInnerHTML;
+
+              expensesList.append(expense);
+
+              totalExpenseSum += data_expense.amount;
+
+              expenseCounter++;
+
+              if (!categoryTotals[data_expense.category]) {
+                categoryTotals[data_expense.category] = 0;
+              }
+              categoryTotals[data_expense.category] += data_expense.amount;
+              categories.add(data_expense.category);
+            });
+          }
+
           // Attach event listeners for the delete buttons
           let removeButtons = document.querySelectorAll(".remove_expense");
           removeButtons.forEach((remove) => {
@@ -250,7 +256,7 @@ function updateList() {
           });
 
           document.getElementById("totalExpense").innerHTML =
-            "$ " + totalExpenseSum;
+            "$" + totalExpenseSum;
           document.getElementById(
             "expenseCounter"
           ).innerHTML = `Amount of expenses: ${expenseCounter}`;
@@ -375,6 +381,7 @@ let playerTotalsBarChart = new Chart("playerTotals", {
         data: [],
         backgroundColor: userColors,
         borderRadius: 10,
+        borderSkipped: false,
       },
     ],
   },
@@ -382,13 +389,12 @@ let playerTotalsBarChart = new Chart("playerTotals", {
     maintainAspectRatio: false,
     scales: {
       y: {
-        min: 0,
-        display: true,
-        grid: {
-          display: false,
-        },
+        display: false,
       },
       x: {
+        border: {
+          display: false,
+        },
         grid: {
           display: false,
         },
@@ -403,7 +409,7 @@ let playerTotalsBarChart = new Chart("playerTotals", {
         callbacks: {
           label: function (tooltipItem) {
             let value = tooltipItem.raw;
-            return value + " $";
+            return "$" + value;
           },
         },
       },
@@ -434,7 +440,7 @@ let playerTotalsDoughnutChart = new Chart("playerDoughnuts", {
         callbacks: {
           label: function (tooltipItem) {
             let value = tooltipItem.raw;
-            return "$ " + value;
+            return "$" + value;
           },
         },
         labels: {

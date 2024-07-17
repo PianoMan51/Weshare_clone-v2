@@ -16,7 +16,14 @@
 <body>
     <div id="app">
         <div id="nav_banner">
-            <span>Home</span>
+            <a href="/" class="nav">
+                <i class="fa-solid fa-home fa-xl"></i>
+                <span>Home</span>
+            </a>
+            <a href="/details" class="nav">
+                <i class="fa-solid fa-table-columns fa-xl"></i>
+                <span>Splits</span>
+            </a>
         </div>
 
         <div id="content">
@@ -24,17 +31,21 @@
             <div class="section left" style="width: 60%;">
                 <div id="total_dashboard" class="content">
                     <div>
-                        <h3>Total expenses</h3>
+                        <h3>WeShare</h3>
                         <span>Thursday, July 11, 2024</span>
                     </div>
                     <div class="total_dashboard section">
+                        <span style="color: white">Total expenses</span>
                         <span id="totalExpense" style="font-size: 30px;"></span>
                     </div>
 
                 </div>
 
                 <div id="barchart" class="content">
-                    <canvas id="playerTotals"></canvas>
+                    <span>Player Totals</span>
+                    <div>
+                        <canvas id="playerTotals"></canvas>
+                    </div>
                 </div>
 
                 <div class="content" style="flex: 1">
@@ -104,10 +115,6 @@
         </div>
 
     </div>
-
-
-
-
     <script src="main.js"></script>
 </body>
 

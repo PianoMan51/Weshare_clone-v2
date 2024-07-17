@@ -14,6 +14,10 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "main.html"));
 });
 
+app.get("/details", (req, res) => {
+  res.sendFile(path.join(__dirname, "details.html"));
+});
+
 app.get("/main.js", (req, res) => {
   res.sendFile(path.join(__dirname, "main.js"), {
     headers: {
