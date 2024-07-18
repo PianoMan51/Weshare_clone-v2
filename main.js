@@ -36,6 +36,16 @@ expenseAmount.addEventListener("keypress", function (event) {
   }
 });
 
+document.querySelectorAll(".nav").forEach((button) => {
+  let content = button.getAttribute("name");
+  button.addEventListener("click", function () {
+    document.querySelectorAll(".page_content").forEach((page)=>{
+      page.style.display = "none";
+    })
+    document.querySelector(".page_content." + content).style.display = "flex"
+  });
+});
+
 categories.forEach((cat) => {
   cat.addEventListener("click", function () {
     categories.forEach((item) => {
@@ -115,12 +125,12 @@ function addExpense() {
     (percentageRadio.checked && sum < 100.01 && sum > 99.99) ||
     (!percentageRadio.checked && sum == expenseAmount.value)
   ) {
-    inputs.forEach((input) => {
-      let option = document.querySelector(".player.active");
-      expense.player_amounts[option.innerHTML] = percentageRadio.checked
-        ? (input.value * expenseAmount.value) / 100
-        : input.value;
-    });
+    for (let i = 0; i < inputSelect.options.length; i++) {
+      let option = inputSelect.options[i];
+      if (option.value !== payer) {
+        expense.others[option.value] = input.value;
+      }
+    }
 
     fetch("/addExpense", {
       method: "POST",

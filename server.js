@@ -14,10 +14,6 @@ app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "main.html"));
 });
 
-app.get("/details", (req, res) => {
-  res.sendFile(path.join(__dirname, "details.html"));
-});
-
 app.get("/main.js", (req, res) => {
   res.sendFile(path.join(__dirname, "main.js"), {
     headers: {
@@ -57,6 +53,25 @@ app.get("/expenses", (req, res) => {
 
 app.get("/players", (req, res) => {
   const data = "players.json";
+
+  fs.readFile(data, "utf8", (err, fileContent) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error reading JSON file.");
+      return;
+    }
+    try {
+      const jsonData = JSON.parse(fileContent);
+      res.json(jsonData);
+    } catch (error) {
+      console.error("Error parsing JSON:", error.message);
+      res.status(500).send("Error parsing JSON file.");
+    }
+  });
+});
+
+app.get("/bills", (req, res) => {
+  const data = "bills.json";
 
   fs.readFile(data, "utf8", (err, fileContent) => {
     if (err) {
@@ -122,6 +137,34 @@ app.post("/addPlayer", (req, res) => {
     players.push(player);
 
     fs.writeFile("players.json", JSON.stringify(players), (err) => {
+      if (err) {
+        console.error("Error writing file:", err);
+        res.status(500).send("Internal Server Error");
+        return;
+      }
+      res.status(200).send("Player added successfully");
+    });
+  });
+});
+
+app.post("/addBill", (req, res) => {
+  const bill = req.body;
+
+  fs.readFile("bills.json", (err, data) => {
+    if (err) {
+      console.error("Error reading file:", err);
+      res.status(500).send("Internal Server Error");
+      return;
+    }
+
+    let bills = [];
+    if (data.length > 0) {
+      bills = JSON.parse(data);
+    }
+
+    bills.push(bill);
+
+    fs.writeFile("bills.json", JSON.stringify(players), (err) => {
       if (err) {
         console.error("Error writing file:", err);
         res.status(500).send("Internal Server Error");

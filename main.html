@@ -16,100 +16,114 @@
 <body>
     <div id="app">
         <div id="nav_banner">
-            <a href="/" class="nav">
+            <div class="nav" name="dashboard">
                 <i class="fa-solid fa-home fa-xl"></i>
                 <span>Home</span>
-            </a>
-            <a href="/details" class="nav">
+            </div>
+            <div class="nav" name="splits">
                 <i class="fa-solid fa-table-columns fa-xl"></i>
                 <span>Splits</span>
-            </a>
+            </div>
         </div>
 
         <div id="content">
+            <div class="page_content dashboard">
+                <div class="section left" style="width: 60%;">
+                    <div id="total_dashboard" class="content">
+                        <div>
+                            <h3>WeShare</h3>
+                            <span>Thursday, July 11, 2024</span>
+                        </div>
+                        <div class="total_dashboard section">
+                            <span style="color: white">Total expenses</span>
+                            <span id="totalExpense" style="font-size: 30px;"></span>
+                        </div>
 
-            <div class="section left" style="width: 60%;">
-                <div id="total_dashboard" class="content">
-                    <div>
-                        <h3>WeShare</h3>
-                        <span>Thursday, July 11, 2024</span>
-                    </div>
-                    <div class="total_dashboard section">
-                        <span style="color: white">Total expenses</span>
-                        <span id="totalExpense" style="font-size: 30px;"></span>
                     </div>
 
+                    <div id="barchart" class="content">
+                        <span>Player Totals</span>
+                        <div>
+                            <canvas id="playerTotals"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="content" style="flex: 1">
+                        <h3>All expenses</h3>
+                        <span id="expenseCounter">3 total</span>
+                        <div id="expensesList"></div>
+                    </div>
                 </div>
 
-                <div id="barchart" class="content">
-                    <span>Player Totals</span>
-                    <div>
-                        <canvas id="playerTotals"></canvas>
+                <div class="section right" style="width: 40%;">
+                    <div id="add_player_container" class="content">
+                        <h2>Add players</h2>
+                        <div>
+                            <input id="add_players">
+                            <button id="add_playerButton" style="width: 50px;">Add</button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="content" style="flex: 1">
-                    <h3>All expenses</h3>
-                    <span id="expenseCounter">3 total</span>
-                    <div id="expensesList"></div>
+                    <div id="input_container" class="content">
+                        <h2>Add expense</h2>
+
+                        <div id="expense_details">
+                            <input id="inputAmount" placeholder="499,-">
+
+                            <div id="categories">
+                                <button class="category" value="groceries"><i
+                                        class="fa-solid fa-cart-shopping fa-2xl"></i></button>
+                                <button class="category" value="drinks"><i
+                                        class="fa-solid fa-martini-glass-citrus fa-2xl"></i></button>
+                                <button class="category" value="restaurant"><i
+                                        class="fa-solid fa-utensils fa-2xl"></i></button>
+                                <button class="category" value="gift"><i class="fa-solid fa-gift fa-2xl"></i></button>
+                                <button class="category" value="other"><i
+                                        class="fa-solid fa-question fa-2xl"></i></button>
+                            </div>
+
+                            <div id="playerList"></div>
+
+                            <button id="continue">Continue</button>
+                        </div>
+
+                        <div id="splitContainer" style="display: none;">
+                            <label for="percentage">%</label>
+                            <input type="radio" name="splitType" id="percentage" checked="checked"><br>
+                            <label for="raw">$</label>
+                            <input type="radio" name="splitType" id="raw">
+
+                            <div id="splitPlayers"></div>
+
+                            <span id="splitSum" style="color: var(--green)"></span><br>
+                            <button id="addExpense">Add expense</button>
+                        </div>
+
+                    </div>
+
+                    <div id="graphs_container" class="content">
+                        <div class="doughnutGraph">
+                            <canvas id="playerDoughnuts"></canvas>
+                        </div>
+                        <div class="doughnutGraph">
+                            <canvas id="categoriesDoughnuts"></canvas>
+                        </div>
+                    </div>
+
+
                 </div>
             </div>
 
-            <div class="section right" style="width: 40%;">
-                <div id="add_player_container" class="content">
-                    <h2>Add players</h2>
-                    <div>
-                        <input id="add_players">
-                        <button id="add_playerButton" style="width: 50px;">Add</button>
+            <div class="page_content splits" style="display: none;">
+                <div class="section left" style="width: 80%;">
+                    <div class="content" id="splitDashboard">
                     </div>
                 </div>
 
-                <div id="input_container" class="content">
-                    <h2>Add expense</h2>
-
-                    <div id="expense_details">
-                        <input id="inputAmount" placeholder="499,-">
-
-                        <div id="categories">
-                            <button class="category" value="groceries"><i
-                                    class="fa-solid fa-cart-shopping fa-2xl"></i></button>
-                            <button class="category" value="drinks"><i
-                                    class="fa-solid fa-martini-glass-citrus fa-2xl"></i></button>
-                            <button class="category" value="restaurant"><i
-                                    class="fa-solid fa-utensils fa-2xl"></i></button>
-                            <button class="category" value="gift"><i class="fa-solid fa-gift fa-2xl"></i></button>
-                            <button class="category" value="other"><i class="fa-solid fa-question fa-2xl"></i></button>
-                        </div>
-
-                        <div id="playerList"></div>
-
-                        <button id="continue">Continue</button>
-                    </div>
-
-                    <div id="splitContainer" style="display: none;">
-                        <label for="percentage">%</label>
-                        <input type="radio" name="splitType" id="percentage" checked="checked"><br>
-                        <label for="raw">$</label>
-                        <input type="radio" name="splitType" id="raw">
-
-                        <div id="splitPlayers"></div>
-
-                        <span id="splitSum" style="color: var(--green)"></span><br>
-                        <button id="addExpense">Add expense</button>
-                    </div>
-
-                </div>
-
-                <div id="graphs_container" class="content">
-                    <div class="doughnutGraph">
-                        <canvas id="playerDoughnuts"></canvas>
-                    </div>
-                    <div class="doughnutGraph">
-                        <canvas id="categoriesDoughnuts"></canvas>
+                <div class="section right" style="width: 20%;">
+                    <div class="content">
                     </div>
                 </div>
-
-
             </div>
 
         </div>
