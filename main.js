@@ -39,10 +39,10 @@ expenseAmount.addEventListener("keypress", function (event) {
 document.querySelectorAll(".nav").forEach((button) => {
   let content = button.getAttribute("name");
   button.addEventListener("click", function () {
-    document.querySelectorAll(".page_content").forEach((page)=>{
+    document.querySelectorAll(".page_content").forEach((page) => {
       page.style.display = "none";
-    })
-    document.querySelector(".page_content." + content).style.display = "flex"
+    });
+    document.querySelector(".page_content." + content).style.display = "flex";
   });
 });
 
@@ -125,12 +125,16 @@ function addExpense() {
     (percentageRadio.checked && sum < 100.01 && sum > 99.99) ||
     (!percentageRadio.checked && sum == expenseAmount.value)
   ) {
-    for (let i = 0; i < inputSelect.options.length; i++) {
-      let option = inputSelect.options[i];
-      if (option.value !== payer) {
-        expense.others[option.value] = input.value;
+    inputs.forEach((input, index) => {
+      let payer = document.querySelector(".player.active").innerHTML;
+      let other =
+        document.getElementById("playerList").children[index].innerHTML;
+      if (other !== payer) {
+        expense.player_amounts[other] = percentageRadio.checked
+          ? (input.value * expenseAmount.value) / 100
+          : input.value;
       }
-    }
+    });
 
     fetch("/addExpense", {
       method: "POST",
@@ -143,6 +147,7 @@ function addExpense() {
         if (response.ok) {
           console.log("Expense posted successfully");
           updateList();
+          tabs(payer);
           expenseAmount.value = "";
           categories.forEach((item) => {
             item.classList.remove("active");
@@ -517,6 +522,38 @@ function updateCategories(data, labels) {
   categoriesDoughnutChart.data.labels = labels;
 
   categoriesDoughnutChart.update();
+}
+
+function tabs(payer) {
+  let tab = {
+    payer: payer,
+    others: "null",
+  };
+
+  fetch("/tabs")
+    .then((response) => response.json())
+    .then((data) => {
+      // Check if there is a tab with the same payer
+      let existingTab = data.some((expense) => expense.payer === payer);
+
+      if (!existingTab) {
+        fetch("/addTab", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(tab),
+        }).then((response) => {
+          if (response.ok) {
+            console.log("Tab posted successfully");
+          } else {
+            console.error("Failed to post tab");
+          }
+        });
+      } else {
+        console.log("Tab with the specified payer already exists");
+      }
+    })
 }
 
 playerTotalsBarChart.update();

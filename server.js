@@ -70,8 +70,8 @@ app.get("/players", (req, res) => {
   });
 });
 
-app.get("/bills", (req, res) => {
-  const data = "bills.json";
+app.get("/tabs", (req, res) => {
+  const data = "tabs.json";
 
   fs.readFile(data, "utf8", (err, fileContent) => {
     if (err) {
@@ -147,24 +147,23 @@ app.post("/addPlayer", (req, res) => {
   });
 });
 
-app.post("/addBill", (req, res) => {
-  const bill = req.body;
-
-  fs.readFile("bills.json", (err, data) => {
+app.post("/addTab", (req, res) => {
+  const tab = req.body;
+  fs.readFile("tabs.json", (err, data) => {
     if (err) {
       console.error("Error reading file:", err);
       res.status(500).send("Internal Server Error");
       return;
     }
 
-    let bills = [];
+    let tabs = [];
     if (data.length > 0) {
-      bills = JSON.parse(data);
+      tabs = JSON.parse(data);
     }
 
-    bills.push(bill);
+    tabs.push(tab);
 
-    fs.writeFile("bills.json", JSON.stringify(players), (err) => {
+    fs.writeFile("tabs.json", JSON.stringify(tabs), (err) => {
       if (err) {
         console.error("Error writing file:", err);
         res.status(500).send("Internal Server Error");
@@ -185,10 +184,9 @@ app.delete("/delete_expense/:id", (req, res) => {
     try {
       // Parse the JSON data
       let expenses = JSON.parse(data);
-      
+
       // Remove the expense from the array
       expenses.splice(expenseId, 1);
-
 
       // Save the updated JSON back to the file
       fs.writeFile(
@@ -213,5 +211,4 @@ app.delete("/delete_expense/:id", (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
 });
