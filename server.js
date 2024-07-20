@@ -10,6 +10,8 @@ app.use(bodyParser.json({ limit: "10mb" }));
 
 app.use(express.json());
 
+/////////////////////  PUBLIC /////////////////////
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "main.html"));
 });
@@ -210,5 +212,42 @@ app.delete("/delete_expense/:id", (req, res) => {
   });
 });
 
-app.listen(port, () => {
+/////////////////////  PUT DATA /////////////////////
+
+app.put("/data/:index", (req, res) => {
+  const index = req.query.index;
+
+  let { payer, others } = req.body;
+
+  fs.readFile("tabs.json", "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send("Error reading JSON file.");
+      return;
+    }
+
+    let jsonData = JSON.parse(data);
+    
+    jsonData[index] = {
+      payer,
+      others,
+    };
+    
+    fs.writeFile(
+      "tabs.json",
+      JSON.stringify(jsonData),
+
+      "utf8",
+      (err) => {
+        if (err) {
+          console.error(err);
+          res.status(500).send("Error writing to JSON file.");
+          return;
+        }
+        res.json({ message: "Tab updated successfully." });
+      }
+    );
+  });
 });
+
+app.listen(port, () => {});

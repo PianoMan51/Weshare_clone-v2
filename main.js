@@ -68,8 +68,6 @@ function addPlayer(name) {
     })
       .then((response) => {
         if (response.ok) {
-          console.log("Player added successfully");
-
           updateList();
         }
       })
@@ -145,9 +143,8 @@ function addExpense() {
     })
       .then((response) => {
         if (response.ok) {
-          console.log("Expense posted successfully");
           updateList();
-          tabs(payer);
+          tabs(payer, expense.player_amounts);
           expenseAmount.value = "";
           categories.forEach((item) => {
             item.classList.remove("active");
@@ -524,19 +521,21 @@ function updateCategories(data, labels) {
   categoriesDoughnutChart.update();
 }
 
-function tabs(payer) {
+function tabs(payer, player_amounts) {
   let tab = {
     payer: payer,
-    others: "null",
+    others: player_amounts,
   };
 
   fetch("/tabs")
     .then((response) => response.json())
     .then((data) => {
-      // Check if there is a tab with the same payer
-      let existingTab = data.some((expense) => expense.payer === payer);
+      // Find the index of the tab with the same payer
+      let existingTabIndex = data.findIndex(
+        (expense) => expense.payer === payer
+      );
 
-      if (!existingTab) {
+      if (existingTabIndex === -1) {
         fetch("/addTab", {
           method: "POST",
           headers: {
@@ -551,9 +550,25 @@ function tabs(payer) {
           }
         });
       } else {
-        console.log("Tab with the specified payer already exists");
+        let updatedAmounts = {};
+
+        for (const key of Object.keys(player_amounts)) {
+          updatedAmounts[key] =
+            player_amounts[key] + data[existingTabIndex].others[key];
+        }
+
+        let updatedTab = {
+          payer: payer,
+          others: updatedAmounts,
+        };
+
+        fetch(`/data/:?index=${existingTabIndex}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedTab),
+        });
       }
-    })
+    });
 }
 
 playerTotalsBarChart.update();
