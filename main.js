@@ -262,6 +262,7 @@ function updateList() {
               }).then((response) => {
                 if (response.ok) {
                   updateList();
+                  tabs();
                 }
               });
             });
@@ -530,47 +531,110 @@ function tabs(payer, player_amounts) {
   fetch("/tabs")
     .then((response) => response.json())
     .then((data) => {
-      // Find the index of the tab with the same payer
-      let existingTabIndex = data.findIndex(
-        (expense) => expense.payer === payer
-      );
+      if (payer && player_amounts) {
+        let existingTabIndex = data.findIndex(
+          (expense) => expense.payer === payer
+        );
 
-      if (existingTabIndex === -1) {
-        fetch("/addTab", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(tab),
-        }).then((response) => {
-          if (response.ok) {
-            console.log("Tab posted successfully");
-          } else {
-            console.error("Failed to post tab");
+        if (existingTabIndex === -1) {
+          fetch("/addTab", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(tab),
+          }).then((response) => {
+            if (response.ok) {
+              console.log("Tab posted successfully");
+            } else {
+              console.error("Failed to post tab");
+            }
+          });
+        } else {
+          let updatedAmounts = {};
+
+          for (const key of Object.keys(player_amounts)) {
+            updatedAmounts[key] =
+              player_amounts[key] + data[existingTabIndex].others[key];
           }
-        });
-      } else {
-        let updatedAmounts = {};
 
-        for (const key of Object.keys(player_amounts)) {
-          updatedAmounts[key] =
-            player_amounts[key] + data[existingTabIndex].others[key];
+          let updatedTab = {
+            payer: payer,
+            others: updatedAmounts,
+          };
+
+          fetch(`/data/:?index=${existingTabIndex}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedTab),
+          });
         }
-
-        let updatedTab = {
-          payer: payer,
-          others: updatedAmounts,
-        };
-
-        fetch(`/data/:?index=${existingTabIndex}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedTab),
-        });
       }
+
+      // Clear existing content
+      document.getElementById("tabs_container").innerHTML = "";
+
+      data.forEach((tab) => {
+        let tabSegment = document.createElement("div");
+        tabSegment.setAttribute("class", "tab_segment");
+        tabSegment.style.width = 100 / data.length + "%";
+
+        // Create unique canvas ID for each player
+        let canvasId = `tab_${tab.payer}`;
+
+        let tabInnerHTML = `
+              <div class="tab_bar">
+                <canvas id="${canvasId}" style="width: 100%; flex: 1"></canvas>
+              </div
+              <span class="tab_payer">${tab.payer}</span>
+              `;
+        tabSegment.innerHTML = tabInnerHTML;
+        document.getElementById("tabs_container").appendChild(tabSegment);
+
+        // Example dummy data, replace with actual data as needed
+        let labels = ["1", "2", "3", "4"];
+
+        new Chart(document.getElementById(canvasId), {
+          type: "bar",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                data: tab.others,
+                borderSkipped: false,
+                borderRadius: 10,
+              },
+            ],
+          },
+          options: {
+            indexAxis: "y",
+            scales: {
+              y: {
+                display: false,
+              },
+              x: {
+                display: false,
+                border: {
+                  display: false,
+                },
+                grid: {
+                  display: false,
+                },
+              },
+            },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
+          },
+        });
+      });
     });
+
 }
 
 playerTotalsBarChart.update();
+tabs();
 updateList();
 updateSplits();
