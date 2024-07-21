@@ -566,7 +566,7 @@ function createTab(payer, player_amounts) {
           others: updatedAmounts,
         };
 
-        fetch(`/updateTab/${existingTabIndex}`, {
+        fetch(`/data/:?index=${existingTabIndex}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(updatedTab),
@@ -588,7 +588,7 @@ function updateTabChart() {
       data.forEach((tab) => {
         let tabSegment = document.createElement("div");
         tabSegment.setAttribute("class", "tab_segment");
-        tabSegment.style.width = 100 / (data.length + 1) + "%";
+        tabSegment.style.width = 100 / data.length + "%";
 
         let canvasId = `tab_${tab.payer}`;
 
@@ -656,6 +656,7 @@ function updateTabChart() {
     });
 }
 
+function updateTabs() {}
 
 playerTotalsBarChart.update();
 updateList();

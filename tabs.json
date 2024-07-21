@@ -1,14 +1,14 @@
 [
   {
     "payer": "Sofie",
-    "others": { "Badi": 83.25, "Stine": 83.25, "Wold": 83.25 }
+    "others": { "Badi": 279.75, "Stine": 296.25, "Wold": 312.75 }
   },
   {
     "payer": "Stine",
-    "others": { "Badi": 855.75, "Sofie": 855.75, "Wold": 855.75 }
+    "others": { "Badi": 43.1, "Sofie": 107.75, "Wold": 4388.65 }
   },
   {
     "payer": "Badi",
-    "others": { "Sofie": 855.75, "Stine": 855.75, "Wold": 855.75 }
+    "others": { "Sofie": 1082.75, "Stine": 1082.75, "Wold": 1082.75 }
   }
 ]
