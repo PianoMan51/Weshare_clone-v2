@@ -257,14 +257,7 @@ function updateList() {
               let expenseElement = remove.closest(".expense");
               let expenseIndex = expenseElement.getAttribute("data-index");
 
-              fetch(`/delete_expense/${expenseIndex}`, {
-                method: "DELETE",
-              }).then((response) => {
-                if (response.ok) {
-                  updateList();
-                  updateTabChart();
-                }
-              });
+              removeExpense(expenseIndex);
             });
           });
 
@@ -656,7 +649,45 @@ function updateTabChart() {
     });
 }
 
-function updateTabs() {}
+function removeExpense(index) {
+  fetch("/tabs")
+    .then((response) => response.json())
+    .then((tabs) => {
+      fetch("/expenses")
+        .then((response) => response.json())
+        .then((expenses) => {
+          tabs.forEach((tab, tab_index) => {
+            if (tab.payer == expenses[index].payer) {
+              let updatedAmounts = tabs[tab_index].others;
+
+              for (const key of Object.keys(tabs[tab_index].others)) {
+                updatedAmounts[key] =
+                  updatedAmounts[key] - expenses[index].player_amounts[key];
+              }
+
+              let updatedTab = {
+                payer: tab.payer,
+                others: updatedAmounts,
+              };
+
+              fetch(`/data/:?index=${tab_index}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(updatedTab),
+              });
+            }
+          });
+        });
+      fetch(`/delete_expense/${index}`, {
+        method: "DELETE",
+      }).then((response) => {
+        if (response.ok) {
+          updateList();
+          updateTabChart();
+        }
+      });
+    });
+}
 
 playerTotalsBarChart.update();
 updateList();

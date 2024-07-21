@@ -184,7 +184,7 @@ body {
 
 .tab_bar {
   background-color: var(--paper);
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 8px;
   flex: 1;
 }

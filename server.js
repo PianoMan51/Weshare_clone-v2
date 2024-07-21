@@ -181,13 +181,10 @@ app.delete("/delete_expense/:id", (req, res) => {
   const expenseId = req.params.id;
   const filename = "expenses.json";
 
-  // Read the current contents of expenses.json
   fs.readFile(filename, "utf8", (err, data) => {
     try {
-      // Parse the JSON data
       let expenses = JSON.parse(data);
 
-      // Remove the expense from the array
       expenses.splice(expenseId, 1);
 
       // Save the updated JSON back to the file
@@ -227,12 +224,12 @@ app.put("/data/:index", (req, res) => {
     }
 
     let jsonData = JSON.parse(data);
-    
+
     jsonData[index] = {
       payer,
       others,
     };
-    
+
     fs.writeFile(
       "tabs.json",
       JSON.stringify(jsonData),
@@ -250,4 +247,6 @@ app.put("/data/:index", (req, res) => {
   });
 });
 
-app.listen(port, () => {});
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
