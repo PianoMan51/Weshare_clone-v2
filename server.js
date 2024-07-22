@@ -209,6 +209,31 @@ app.delete("/delete_expense/:id", (req, res) => {
   });
 });
 
+app.delete("/delete_tab/:id", (req, res) => {
+  let tabId = req.params.id;
+  let filename = "tabs.json";
+
+  fs.readFile(filename, "utf8", (err, data) => {
+    let tabs = JSON.parse(data);
+    tabs.splice(tabId, 1);
+    // Save the updated JSON back to the file
+    fs.writeFile(
+      filename,
+      JSON.stringify(tabs, null, 2),
+
+      "utf8",
+      (err) => {
+        if (err) {
+          console.error(`Error writing file ${filename}:`, err);
+          return res.status(500).json({ error: "Internal Server Error" });
+        }
+
+        res.json({ message: "Tab deleted successfully" });
+      }
+    );
+  });
+});
+
 /////////////////////  PUT DATA /////////////////////
 
 app.put("/data/:index", (req, res) => {

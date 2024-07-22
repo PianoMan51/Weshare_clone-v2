@@ -572,83 +572,6 @@ function createTab(payer, player_amounts) {
     });
 }
 
-function updateTabChart() {
-  document.getElementById("tabs_container").innerHTML = "";
-
-  fetch("/tabs")
-    .then((response) => response.json())
-    .then((data) => {
-      data.forEach((tab) => {
-        let tabSegment = document.createElement("div");
-        tabSegment.setAttribute("class", "tab_segment");
-        tabSegment.style.width = 100 / data.length + "%";
-
-        let canvasId = `tab_${tab.payer}`;
-
-        let tab_colors = [];
-
-        // Fetch players and populate tab_colors before creating the chart
-        fetch("/players")
-          .then((response) => response.json())
-          .then((players) => {
-            Object.keys(tab.others).forEach((other) => {
-              players.forEach((player, index) => {
-                if (other == player.name) {
-                  tab_colors.push(userColors[index]);
-                }
-              });
-            });
-
-            let tabInnerHTML = `
-              <div class="tab_bar">
-                <canvas id="${canvasId}" style="width: 100%; flex: 1"></canvas>
-              </div>
-              <span class="tab_payer">${tab.payer}</span>
-              `;
-            tabSegment.innerHTML = tabInnerHTML;
-            document.getElementById("tabs_container").appendChild(tabSegment);
-
-            new Chart(document.getElementById(canvasId), {
-              type: "bar",
-              data: {
-                labels: Object.keys(tab.others),
-                datasets: [
-                  {
-                    data: Object.values(tab.others),
-                    borderSkipped: false,
-                    borderRadius: 10,
-                    backgroundColor: tab_colors,
-                  },
-                ],
-              },
-              options: {
-                indexAxis: "y",
-                scales: {
-                  y: {
-                    display: false,
-                  },
-                  x: {
-                    display: false,
-                    border: {
-                      display: false,
-                    },
-                    grid: {
-                      display: false,
-                    },
-                  },
-                },
-                plugins: {
-                  legend: {
-                    display: false,
-                  },
-                },
-              },
-            });
-          });
-      });
-    });
-}
-
 function removeExpense(index) {
   fetch("/tabs")
     .then((response) => response.json())
@@ -678,12 +601,101 @@ function removeExpense(index) {
             }
           });
         });
+
       fetch(`/delete_expense/${index}`, {
         method: "DELETE",
       }).then((response) => {
         if (response.ok) {
           updateList();
           updateTabChart();
+        }
+      });
+    });
+}
+
+function updateTabChart() {
+  document.getElementById("tabs_container").innerHTML = "";
+
+  fetch("/tabs")
+    .then((response) => response.json())
+    .then((data) => {
+      data.forEach((tab, index) => {
+        let allZero = Object.values(tab.others).every((value) => value === 0);
+
+        if (!allZero) {
+          let tabSegment = document.createElement("div");
+          tabSegment.setAttribute("class", "tab_segment");
+          tabSegment.style.width = 100 / data.length + "%";
+
+          let canvasId = `tab_${tab.payer}`;
+
+          let tab_colors = [];
+
+          fetch("/players")
+            .then((response) => response.json())
+            .then((players) => {
+              Object.keys(tab.others).forEach((other) => {
+                players.forEach((player, index) => {
+                  if (other == player.name) {
+                    tab_colors.push(userColors[index]);
+                  }
+                });
+              });
+
+              let tabInnerHTML = `
+              <div class="tab_bar">
+                <canvas id="${canvasId}" style="width: 100%; flex: 1"></canvas>
+              </div>
+              <span class="tab_payer">${tab.payer}</span>
+              `;
+              tabSegment.innerHTML = tabInnerHTML;
+              document.getElementById("tabs_container").appendChild(tabSegment);
+
+              new Chart(document.getElementById(canvasId), {
+                type: "bar",
+                data: {
+                  labels: Object.keys(tab.others),
+                  datasets: [
+                    {
+                      data: Object.values(tab.others),
+                      borderSkipped: false,
+                      borderRadius: 10,
+                      backgroundColor: tab_colors,
+                    },
+                  ],
+                },
+                options: {
+                  indexAxis: "y",
+                  scales: {
+                    y: {
+                      display: false,
+                    },
+                    x: {
+                      display: false,
+                      border: {
+                        display: false,
+                      },
+                      grid: {
+                        display: false,
+                      },
+                    },
+                  },
+                  plugins: {
+                    legend: {
+                      display: false,
+                    },
+                  },
+                },
+              });
+            });
+        } else {
+          fetch(`/delete_tab/${index}`, {
+            method: "DELETE",
+          }).then((response) => {
+            if (response.ok) {
+              updateList();
+            }
+          });
         }
       });
     });
