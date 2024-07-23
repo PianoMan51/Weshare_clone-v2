@@ -22,7 +22,7 @@
   --blue: #3498db;
   --darkblue: #2980b9;
   --paper: #f7f1e3;
-  --borderRadius: 10px;
+  --borderRadius: 12px;
 }
 
 body {
@@ -94,6 +94,7 @@ body {
   background-color: white;
   border-radius: var(--borderRadius);
   padding: 10px;
+  transition: all ease-in-out 0.3s;
 }
 
 .content h2 {
@@ -208,6 +209,14 @@ body {
   margin: 5px;
 }
 
+.expenseIcon {
+  position: absolute;
+  right: 20%;
+  top: 40%;
+  transform: scale(4);
+  opacity: 0.3;
+}
+
 .expense-inner {
   width: 100%;
   height: 100%;
@@ -307,7 +316,46 @@ body {
 #add_player_container {
   display: flex;
   flex-direction: row;
+  align-items: center;
   gap: 10px;
+}
+
+#add_players {
+  border-radius: 15px;
+  height: 20px;
+  padding: 5px 10px;
+  border: none;
+  background-color: var(--lightgray);
+  letter-spacing: 2px;
+}
+
+#add_players:focus {
+  outline: none;
+}
+
+#add_playerButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  height: 30px;
+  width: 30px;
+  border-radius: 50%;
+}
+
+#continue {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: none;
+  transform: scale(1);
+  transition: transform 0.3s;
+  cursor: pointer;
+}
+
+#continue:hover {
+  transform: scale(1.1);
+  transition: transform 0.3s;
 }
 
 #playerList {
@@ -318,36 +366,69 @@ body {
   gap: 8px;
 }
 
+.player_element {
+  margin: 0 auto 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
 .player {
   user-select: none;
   width: 80px;
   height: 30px;
   border-radius: 20px;
   padding: 5px 10px;
-  margin: 0 auto 10px auto;
   color: white;
   font-weight: bold;
   display: flex;
   justify-content: center;
   align-items: center;
   transform: scale(1);
-  transition: all 0.2s;
+  transition: opacity 0.3s;
   cursor: pointer;
 }
 
-.player:not(.active):hover {
-  transform: scale(1.05);
+.player:hover {
+  opacity: 1;
+  transform: scale(1.04);
+  transition: 0.2s;
 }
 
-.player:not(.active) {
-  opacity: 50%;
-  transform: scale(0.9);
+.player_dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: red;
+}
+
+.dot_hidden{
+  opacity: 0;
 }
 
 #input_container {
-  flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+}
+
+#splitContainer {
+  background-color: var(--lightgray);
+  border-radius: var(--borderRadius);
+  padding: 6px;
+}
+
+.hidden {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+}
+
+.visible {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #expense_details {

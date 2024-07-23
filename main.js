@@ -8,6 +8,7 @@ let percentageRadio = document.getElementById("percentage");
 let rawRadio = document.getElementById("raw");
 let expenseCategory = document.getElementById("category_select");
 let categories = document.querySelectorAll(".category");
+let inputContainer = document.getElementById("playerListContainer");
 
 let userColors = [
   "rgb(46, 204, 113)", // Green
@@ -48,6 +49,9 @@ document.querySelectorAll(".nav").forEach((button) => {
 
 categories.forEach((cat) => {
   cat.addEventListener("click", function () {
+    if (inputContainer.className == "hidden") {
+      inputContainer.className = "visible";
+    }
     categories.forEach((item) => {
       item.classList.remove("active");
     });
@@ -126,7 +130,7 @@ function addExpense() {
     inputs.forEach((input, index) => {
       let payer = document.querySelector(".player.active").innerHTML;
       let other =
-        document.getElementById("playerList").children[index].innerHTML;
+        document.getElementById("playerList").children[index].children[0].innerHTML;
       if (other !== payer) {
         expense.player_amounts[other] = percentageRadio.checked
           ? (input.value * expenseAmount.value) / 100
@@ -180,20 +184,30 @@ function updateList() {
         .then((response) => response.json())
         .then((players) => {
           let playerNames = [];
+          let categoryIcon = "";
           let playerTotals = [];
           let categoryTotals = {};
           let categories = new Set();
 
           players.forEach((data_player, index) => {
-            let player = document.createElement("div");
-            player.setAttribute("class", "player");
+            let innerHTML = `
+                <div class="player" style="background-color: ${
+                  userColors[index] ? userColors[index] : "black"
+                }">${data_player.name}</div>
+                <div class="player_dot dot_hidden" style="background-color: ${
+                  userColors[index] ? userColors[index] : "black"
+                }"></div>
+            `;
 
-            player.innerHTML = data_player.name;
-            if (userColors[index]) {
+            let player = document.createElement("div");
+            player.setAttribute("class", "player_element");
+
+            player.innerHTML = innerHTML;
+            /* if (userColors[index]) {
               player.style.backgroundColor = userColors[index];
             } else {
               player.style.backgroundColor = "black";
-            }
+            } */
 
             playerNames.push(data_player.name);
 
@@ -213,6 +227,23 @@ function updateList() {
           if (data.length > 0) {
             let color = "";
             data.forEach((data_expense, index) => {
+              switch (data_expense.category) {
+                case "groceries":
+                  categoryIcon = "fa-cart-shopping";
+                  break;
+                case "drinks":
+                  categoryIcon = "fa-martini-glass-citrus";
+                  break;
+                case "restaurant":
+                  categoryIcon = "fa-utensils";
+                  break;
+                case "gift":
+                  categoryIcon = "fa-gift";
+                  break;
+                case "other":
+                  categoryIcon = "fa-question";
+                  break;
+              }
               playerNames.forEach((player, color_index) => {
                 if (data_expense.payer == player) {
                   color = userColors[color_index];
@@ -225,12 +256,13 @@ function updateList() {
               let expenseInnerHTML = `
             <div class="expense-inner">
               <div class="expense-front" style="background-color: ${color}">${data_expense.payer}
-                <span class="expense_payer" </span>
+                <span class="expense_payer"></span>
                 <span class="expense_amount">$${data_expense.amount}</span>
+                <div class="expenseIcon"><i class="fa-solid ${categoryIcon}"></i></div>
               </div>
-              <div class="expense-back">
-                <button class="remove_expense"><i class="fa-solid fa-xmark fa-lg"></i></button>
-              </div>
+
+
+              <div class="expense-back"><button class="remove_expense"><i class="fa-solid fa-xmark fa-lg"></i></button></div>
             </div>
             `;
 
@@ -272,9 +304,14 @@ function updateList() {
             player.addEventListener("click", function () {
               playerElements.forEach((item) => {
                 item.classList.remove("active");
+                item.parentElement
+                  .querySelector(".player_dot")
+                  .classList.add("dot_hidden");
               });
-
               player.classList.add("active");
+              player.parentElement
+                .querySelector(".player_dot")
+                .classList.toggle("dot_hidden");
             });
           });
 
@@ -289,33 +326,30 @@ function updateList() {
 
 function continueExpense() {
   if (expenseAmount.value > 0) {
-    if (document.querySelector(".category.active")) {
-      splitContainer.style.display = "block";
-      fetch("/players")
-        .then((response) => response.json())
-        .then((players) => {
-          splitPlayers.innerHTML = ""; // Clear previous entries
-          players.forEach((player) => {
-            let splitDiv = document.createElement("div");
-            let initialPreview = percentageRadio.checked
-              ? `$ ${(expenseAmount.value * 100) / players.length / 100}`
-              : "";
-            let innerHTML = `<span>${player.name}</span>
+    splitContainer.style.display = "block";
+    inputContainer.className = "hidden";
+    fetch("/players")
+      .then((response) => response.json())
+      .then((players) => {
+        splitPlayers.innerHTML = ""; // Clear previous entries
+        players.forEach((player) => {
+          let splitDiv = document.createElement("div");
+          let initialPreview = percentageRadio.checked
+            ? `$ ${(expenseAmount.value * 100) / players.length / 100}`
+            : "";
+          let innerHTML = `<span>${player.name}</span>
                 <input class="splitInput" value="${100 / players.length}">
                 <span class="splitLabel">${
                   percentageRadio.checked ? "%" : "$"
                 }</span>
                 <span class="percentagePreview">${initialPreview}</span>`;
 
-            splitDiv.innerHTML = innerHTML;
-            splitPlayers.appendChild(splitDiv);
-          });
-
-          updateSplits();
+          splitDiv.innerHTML = innerHTML;
+          splitPlayers.appendChild(splitDiv);
         });
-    } else {
-      alert("Choose category");
-    }
+
+        updateSplits();
+      });
   } else {
     alert("Insert amount");
     expenseAmount.value = "";
@@ -671,6 +705,7 @@ function updateTabChart() {
                       display: false,
                     },
                     x: {
+                      max: 3000,
                       display: false,
                       border: {
                         display: false,
