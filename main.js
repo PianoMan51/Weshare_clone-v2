@@ -240,8 +240,8 @@ function updateList() {
                 case "gift":
                   categoryIcon = "fa-gift";
                   break;
-                case "other":
-                  categoryIcon = "fa-question";
+                case "activity":
+                  categoryIcon = "fa-baseball-bat-ball";
                   break;
               }
               playerNames.forEach((player, color_index) => {
@@ -649,10 +649,19 @@ function removeExpense(index) {
 
 function updateTabChart() {
   document.getElementById("tabs_container").innerHTML = "";
-
+  let biggestValue = 0;
   fetch("/tabs")
     .then((response) => response.json())
     .then((data) => {
+      
+      data.forEach((tabs) => {
+        Object.values(tabs.others).forEach((val) => {
+          if (val > biggestValue) {
+            biggestValue = val;
+          }
+        });
+      })
+
       data.forEach((tab, index) => {
         let allZero = Object.values(tab.others).every((value) => value === 0);
 
@@ -684,7 +693,6 @@ function updateTabChart() {
               `;
               tabSegment.innerHTML = tabInnerHTML;
               document.getElementById("tabs_container").appendChild(tabSegment);
-
               new Chart(document.getElementById(canvasId), {
                 type: "bar",
                 data: {
@@ -705,7 +713,7 @@ function updateTabChart() {
                       display: false,
                     },
                     x: {
-                      max: 3000,
+                      max: biggestValue,
                       display: false,
                       border: {
                         display: false,

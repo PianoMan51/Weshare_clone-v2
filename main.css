@@ -200,6 +200,14 @@ body {
 .doughnutGraph {
   width: 200px;
   height: 200px;
+  position: relative;
+}
+
+.doughnutGraph span{
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .expense {
