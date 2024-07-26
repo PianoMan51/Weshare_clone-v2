@@ -1,13 +1,13 @@
-let express = require("express");
-let fs = require("fs");
-let path = require("path");
-
-let app = express();
-let port = 8080;
-
+const express = require("express");
+const { exec } = require("child_process");
+const fs = require("fs");
+const path = require("path");
 const bodyParser = require("body-parser");
-app.use(bodyParser.json({ limit: "10mb" }));
 
+const app = express();
+const port = 8080;
+
+app.use(bodyParser.json({ limit: "10mb" }));
 app.use(express.json());
 
 /////////////////////  PUBLIC /////////////////////
@@ -272,6 +272,10 @@ app.put("/data/:index", (req, res) => {
   });
 });
 
+
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
+
+  exec(`start http://localhost:${port}`);
+
 });

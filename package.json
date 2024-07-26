@@ -1,6 +1,26 @@
 {
+  "name": "WeShare",
+  "version": "1.0.0",
+  "description": "My Node.js application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "chart.js": "^4.4.3",
-    "express": "^4.19.2"
-  }
+    "express": "^4.19.2",
+    "puppeteer": "^22.14.0",
+    "puppeteer-chromium-resolver": "^22.0.0"
+  },
+  "pkg": {
+    "assets": [
+      "public/**/*",
+      "expenses.json",
+      "players.json",
+      "tabs.json",
+      "puppeteer-chromium/**/*"
+    ],
+    "scripts": []
+  },
+  "bin": "server.js"
 }
